@@ -1,6 +1,6 @@
 # $^R$-FLAV: Rolling Flow matching for infinite Audio Video generation
 
-This is the official implementation of 
+This is the official implementation of [R-FLAV: Rolling Flow matching for infinite Audio Video generation](https://arxiv.org/abs/2503.08307)
 
 An overview of our models is shown here: $^R$-FLAV: Rolling Flow mathcing for infinite Audio Video generation.
 
