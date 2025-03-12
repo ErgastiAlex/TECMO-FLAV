@@ -44,7 +44,7 @@ pip install git+https://github.com/facebookresearch/segment-anything.git
 ```
 
 ## Inference
-Will be published soon.
+Checkpoints are available at [Hugging Face](https://huggingface.co/MaverickAlex/R-FLAV)🤗
 
 Command line options should be the same as the loaded model (eg. num classes, predicted frames ecc.) to avoid loading errors:
 ```bash
