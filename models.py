@@ -1,20 +1,11 @@
-# Copyright (c) Meta Platforms, Inc. and affiliates.
-# All rights reserved.
-
-# This source code is licensed under the license found in the
-# LICENSE file in the root directory of this source tree.
-# --------------------------------------------------------
-# References:
-# GLIDE: https://github.com/openai/glide-text2im
-# MAE: https://github.com/facebookresearch/mae/blob/main/models_mae.py
-# --------------------------------------------------------
-
 import torch
 import torch.nn as nn
 import numpy as np
 import math
 from timm.models.vision_transformer import PatchEmbed, Attention, Mlp
 import einops
+
+from huggingface_hub import PyTorchModelHubMixin
 
 import torch.utils.checkpoint as checkpoint
 
@@ -371,7 +362,7 @@ class FinalLayer(nn.Module):
         return x
 
 
-class FLAV(nn.Module):
+class FLAV(nn.Module, PyTorchModelHubMixin):
     """
     Diffusion model with a Transformer backbone.
     """

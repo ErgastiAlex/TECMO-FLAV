@@ -1,5 +1,3 @@
-# Copyright (c) Meta Platforms, Inc. All Rights Reserved
-
 import os.path as osp
 import math
 import pickle
