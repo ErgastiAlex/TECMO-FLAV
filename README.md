@@ -1,6 +1,6 @@
 # $^R$-FLAV: Rolling Flow matching for infinite Audio Video generation
 
-This is the official implementation of 
+This is the official implementation of [R-FLAV: Rolling Flow matching for infinite Audio Video generation](https://arxiv.org/abs/2503.08307)
 
 An overview of our models is shown here: $^R$-FLAV: Rolling Flow mathcing for infinite Audio Video generation.
 
@@ -9,6 +9,9 @@ An overview of our models is shown here: $^R$-FLAV: Rolling Flow mathcing for in
 
 In our paper we explores three different model configuration, illustrated here:
 <center><img src="imgs/blocks.png" alt="drawing" width="800"/></center>
+
+## Demo
+Try out our demo for free without any requirements on [Hugging Face](https://huggingface.co/spaces/MaverickAlex/R-FLAV)🤗
 
 ## Results
 
@@ -44,7 +47,26 @@ pip install git+https://github.com/facebookresearch/segment-anything.git
 ```
 
 ## Inference
-Will be published soon.
+Checkpoints are available at [Hugging Face](https://huggingface.co/MaverickAlex/R-FLAV)🤗 and can be directly download using:
+
+```python
+from huggingface_hub import hf_hub_download
+import torch
+
+ckpt_path = hf_hub_download(repo_id="MaverickAlex/R-FLAV", filename="aist-ema.pth")
+
+state_dict = torch.load(ckpt_path)
+
+ema = EMAModel(model.parameters())
+ema.load_state_dict(state_dict)
+ema.copy_to(model.parameters())
+
+hf_hub_download(repo_id="MaverickAlex/R-FLAV", filename="vocoder-aist/config.json")
+vocoder_path = hf_hub_download(repo_id="MaverickAlex/R-FLAV", filename="vocoder-aist/vocoder.pt")
+
+vocoder_path = vocoder_path.replace("vocoder.pt", "")
+vocoder = Generator.from_pretrained(vocoder_path)
+```
 
 Command line options should be the same as the loaded model (eg. num classes, predicted frames ecc.) to avoid loading errors:
 ```bash
