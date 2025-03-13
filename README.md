@@ -47,23 +47,25 @@ pip install git+https://github.com/facebookresearch/segment-anything.git
 ```
 
 ## Inference
-Checkpoints are available at [Hugging Face](https://huggingface.co/MaverickAlex/R-FLAV)🤗 and can be directly download using:
+Checkpoints are available at Hugging Face🤗 and can be directly 
+
+| Model | Link |
+|-|-|
+| AIST | https://huggingface.co/MaverickAlex/R-FLAV-B-1-AIST |
+| Landscape | https://huggingface.co/MaverickAlex/R-FLAV-B-1-LS |
+
+download using:
 
 ```python
 from huggingface_hub import hf_hub_download
 import torch
 
-ckpt_path = hf_hub_download(repo_id="MaverickAlex/R-FLAV", filename="aist-ema.pth")
+model_ckpt = "MaverickAlex/R-FLAV-B-1-AIST" # MaverickAlex/R-FLAV-B-1-LS
 
-state_dict = torch.load(ckpt_path)
+model = FLAV.from_pretrained(model_ckpt)
 
-ema = EMAModel(model.parameters())
-ema.load_state_dict(state_dict)
-ema.copy_to(model.parameters())
-
-hf_hub_download(repo_id="MaverickAlex/R-FLAV", filename="vocoder-aist/config.json")
-vocoder_path = hf_hub_download(repo_id="MaverickAlex/R-FLAV", filename="vocoder-aist/vocoder.pt")
-
+hf_hub_download(repo_id=model_ckpt, filename="vocoder/config.json")
+vocoder_path = hf_hub_download(repo_id=model_ckpt, filename="vocoder/vocoder.pt")
 vocoder_path = vocoder_path.replace("vocoder.pt", "")
 vocoder = Generator.from_pretrained(vocoder_path)
 ```
