@@ -8,7 +8,10 @@ An overview of our models is shown here: $^R$-FLAV: Rolling Flow mathcing for in
 
 
 In our paper we explores three different model configuration, illustrated here:
-<center><img src="imgs/blocks.png" alt="drawing" width="800"/></center>
+<center><img src="imgs/blocks.png" alt="drawing" width="800"/></center>a
+
+## Demo
+Try out our demo for free without any requirements on [Hugging Face](https://huggingface.co/spaces/MaverickAlex/R-FLAV)🤗
 
 ## Results
 
