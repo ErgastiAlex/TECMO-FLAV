@@ -47,7 +47,26 @@ pip install git+https://github.com/facebookresearch/segment-anything.git
 ```
 
 ## Inference
-Checkpoints are available at [Hugging Face](https://huggingface.co/MaverickAlex/R-FLAV)🤗
+Checkpoints are available at [Hugging Face](https://huggingface.co/MaverickAlex/R-FLAV)🤗 and can be directly download using:
+
+```python
+from huggingface_hub import hf_hub_download
+import torch
+
+ckpt_path = hf_hub_download(repo_id="MaverickAlex/R-FLAV", filename="aist-ema.pth")
+
+state_dict = torch.load(ckpt_path)
+
+ema = EMAModel(model.parameters())
+ema.load_state_dict(state_dict)
+ema.copy_to(model.parameters())
+
+hf_hub_download(repo_id="MaverickAlex/R-FLAV", filename="vocoder-aist/config.json")
+vocoder_path = hf_hub_download(repo_id="MaverickAlex/R-FLAV", filename="vocoder-aist/vocoder.pt")
+
+vocoder_path = vocoder_path.replace("vocoder.pt", "")
+vocoder = Generator.from_pretrained(vocoder_path)
+```
 
 Command line options should be the same as the loaded model (eg. num classes, predicted frames ecc.) to avoid loading errors:
 ```bash
