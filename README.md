@@ -159,3 +159,7 @@ dataset-folder:
       url={https://arxiv.org/abs/2503.08307}, 
 }
 ```
+
+## Ack
+
+Our code is inspired by [DiT](https://github.com/facebookresearch/DiT)
