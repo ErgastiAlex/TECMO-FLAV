@@ -70,37 +70,25 @@ vocoder_path = vocoder_path.replace("vocoder.pt", "")
 vocoder = Generator.from_pretrained(vocoder_path)
 ```
 
-Command line options should be the same as the loaded model (eg. num classes, predicted frames ecc.) to avoid loading errors:
+Sampling command:
 ```bash
 python sample-metrics.py \
-    --model FLAV-B/1 \
-    --data-path <datapath> \
-    --batch-size 32 --num-classes <classes> \
-    --image-size 256 \
-    --experiment-dir <exp-dir>\
+    --model-ckpt MaverickAlex/R-FLAV-B-1-AIST \
     --results-dir results \
     --video-length 16 \
-    --predict-frames 10 \
-    --causal-attn \
     --num-videos 2048 \
     --audio-scale <audio-scale> \
-    --num-workers 16 \
-    --num_timesteps 20 \
-    --use_sd_vae \
-    --ignore-cache --vocoder-ckpt <vocoder-ckpt>
+    --num-timesteps 2
 ```
 
-Where `<exp-dir>` is:
-```
- └──checkpoint
-     └──ema.pth
-```
-
-Where `<vocoder-ckpt>` is:
-```
- └──vocoder
-    ├──config.json
-    └──vocoder.pt
+```bash
+python sample-metrics-a2v.py \
+    --model-ckpt MaverickAlex/R-FLAV-B-1-AIST \
+    --results-dir results \
+    --video-length 16 \
+    --num-videos 2048 \
+    --num-timesteps 2 \
+    --data-path ...
 ```
 
 ## Training

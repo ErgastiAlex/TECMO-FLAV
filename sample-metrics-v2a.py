@@ -9,19 +9,17 @@ import logging
 import os
 
 from diffusers.models import AutoencoderKL
-from efficientvit.ae_model_zoo import DCAE_HF
-from models import FLAV_models
+from models import FLAV
 
 from diffusion.rectified_flow import RectifiedFlow
 
-from diffusers.training_utils import EMAModel
-from accelerate import Accelerator
-from accelerate.utils import ProjectConfiguration, set_seed
+from accelerate.utils import set_seed
 from converter import Generator
 
 import einops
 from common_parser import CommonParser
 from utils import *
+from huggingface_hub import hf_hub_download
 
 AUDIO_T_PER_FRAME = 1600 // 160 
 
@@ -31,61 +29,38 @@ AUDIO_T_PER_FRAME = 1600 // 160
 
 def main(args):
     assert torch.cuda.is_available(), "Sampling currently requires at least one GPU."
-
-    os.makedirs(args.experiment_dir, exist_ok=True)  # Make results folder (holds all experiment subfolders)
-    model_string_name = args.model.replace("/", "-") 
-    experiment_dir = f"{args.experiment_dir}/{model_string_name}"  # Create an experiment folder
-    checkpoint_dir = f"{experiment_dir}/checkpoints"  # Loading saved model checkpoints
-    os.makedirs(checkpoint_dir, exist_ok=True)
-    
-    os.makedirs(os.path.join(experiment_dir, args.results_dir), exist_ok=True)
+    os.makedirs(args.results_dir, exist_ok=True)
 
     device = "cuda"
 
     set_seed(args.seed)  # Set global seed for reproducibility
 
-    if args.use_sd_vae:
-        vae = AutoencoderKL.from_pretrained(f"stabilityai/sd-vae-ft-{args.vae}")
-    else:
-        vae = DCAE_HF.from_pretrained(f"mit-han-lab/dc-ae-f32c32-sana-1.0")
-
-    assert args.image_size % 8 == 0, "Image size must be divisible by 8 (for the VAE encoder)."
-    latent_size = args.image_size // (8 if args.use_sd_vae else 32)
+    vae = AutoencoderKL.from_pretrained(f"stabilityai/sd-vae-ft-ema")
     
-    model = FLAV_models[args.model](
-        latent_size=latent_size,
-        in_channels = (4 if args.use_sd_vae else 32),
-        num_classes=args.num_classes,
-        predict_frames = args.predict_frames,
-        grad_ckpt = args.grad_ckpt,
-        causal_attn = args.causal_attn,
-    )
+    model = FLAV.from_pretrained(args.model_ckpt)
 
-    loader = get_dataloader(args, None, args.video_length, train=True)
+    hf_hub_download(repo_id=args.model_ckpt, filename="vocoder/config.json")
+    vocoder_path = hf_hub_download(repo_id=args.model_ckpt, filename="vocoder/vocoder.pt")
 
-    state_dict = torch.load(os.path.join(checkpoint_dir, "checkpoint_80", "ema.pth"))
-    ema = EMAModel(model.parameters())
-    ema.load_state_dict(state_dict)
-    ema.copy_to(model.parameters())
+    vocoder_path = vocoder_path.replace("vocoder.pt", "")
+    vocoder = Generator.from_pretrained(vocoder_path)
 
     rectified_flow = RectifiedFlow(num_timesteps=args.num_timesteps, 
-                                   warmup_timesteps=args.predict_frames, 
-                                   window_size=args.predict_frames)
+                                   warmup_timesteps=model.predict_frames,
+                                   window_size=model.predict_frames)
 
-    vocoder = Generator.from_pretrained(args.vocoder_ckpt)
+    loader = get_dataloader(args, None, args.video_length, train=True)
 
     model.to(device)    
     vocoder.to(device)
     vae.to(device)
-    
-    os.makedirs(os.path.join(experiment_dir,args.results_dir, "samples-v2a/"), exist_ok=True)
-    os.makedirs(os.path.join(experiment_dir,args.results_dir, "samples-v2a/audio"), exist_ok=True)
-    os.makedirs(os.path.join(experiment_dir,args.results_dir, "samples-v2a/video"), exist_ok=True)
 
-    audio_latent_size = (args.batch_size, args.predict_frames, 1, 256, AUDIO_T_PER_FRAME)
-    
-    classes = torch.arange(args.num_classes).to(device)
-    
+    os.makedirs(os.path.join(args.results_dir, "samples-v2a/"), exist_ok=True)
+    os.makedirs(os.path.join(args.results_dir, "samples-v2a/audio"), exist_ok=True)
+    os.makedirs(os.path.join(args.results_dir, "samples-v2a/video"), exist_ok=True)
+
+    audio_latent_size = (args.batch_size, model.predict_frames, 1, 256, AUDIO_T_PER_FRAME)
+
     loader = iter(loader)
     for i in range(args.num_videos//args.batch_size):
         v, a, y = next(loader)
@@ -116,17 +91,39 @@ def main(args):
         # Save fake videos:
         wavs = get_wavs(audio, vocoder, args.audio_scale, device)
         for j,(vid, wav) in enumerate(zip(video, wavs)):
-            save_multimodal(vid, wav, os.path.join(experiment_dir,args.results_dir, "samples-v2a/"), f"sample_{i*(args.batch_size)+j}")
+            save_multimodal(vid, wav, os.path.join(args.results_dir, "samples-v2a/"), f"sample_{i*(args.batch_size)+j}")
 
 
+import argparse
 if __name__ == "__main__":
     # Default args here will train DiT-XL/2 with the hyperparameters we used in our paper (except training iters).
-    parser = CommonParser().get_parser()
+    parser = argparse.ArgumentParser()
     parser.add_argument("--model-ckpt", type=str)
-    parser.add_argument("--grad-ckpt", action="store_true")
+
+    parser.add_argument("--audio-scale", type=float, default=3.5009668382765917)
+
+    parser.add_argument("--num-timesteps", type=int, default=2)
+
     parser.add_argument("--cfg-scale", type=float, default=1)
+    parser.add_argument("--num-classes", type=int, default=0)
+    parser.add_argument("--classes", type=int, nargs="+", default=[0])
+
+    parser.add_argument("--results-dir", type=str, default="results")
+    parser.add_argument("--seed", type=int, default=42)
+    
+    #Generation parameters
+    parser.add_argument("--batch-size", type=int, default=4)
+    parser.add_argument("--video-length", type=int, default=1)
     parser.add_argument("--num-videos", type=int, default=2048)
     parser.add_argument("--scale", type=int, default=100)
+
+
+    #Data loader parameters
+    parser.add_argument("--data-path", type=str, default="./datasets")
+    parser.add_argument("--image-size", type=int, default=256)
+    parser.add_argument("--ignore-cache", action="store_true")
+    parser.add_argument("--target-video-fps", type=int, default=10)
+    parser.add_argument("--num-workers", type=int, default=4)
     
     args = parser.parse_args()
     main(args)
