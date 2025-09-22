@@ -4,7 +4,7 @@ This is the official implementation of [R-FLAV: Rolling Flow matching for infini
 
 An overview of our models is shown here: $^R$-FLAV: Rolling Flow mathcing for infinite Audio Video generation.
 
-<center><img src="imgs/FLAV.png" alt="drawing" width="500"/></center>
+<center><img src="imgs/TECMO.png" alt="drawing" width="500"/></center>
 
 
 In our paper we explores three different model configuration, illustrated here:
