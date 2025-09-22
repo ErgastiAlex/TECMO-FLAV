@@ -1,4 +1,4 @@
-# $^R$FLAV: Rolling Flow matching for infinite Audio Video generation
+# TECMO: Efficient Temporal Cross-interaction Module for long synchronized Audio-Video generation
 
 This is the official implementation of [R-FLAV: Rolling Flow matching for infinite Audio Video generation](https://arxiv.org/abs/2503.08307)
 
