@@ -149,14 +149,16 @@ dataset-folder:
 ## Citation
 
 ```
-@misc{ergasti2025rflavrollingflowmatching,
-      title={$^R$FLAV: Rolling Flow matching for infinite Audio Video generation}, 
-      author={Alex Ergasti and Giuseppe Gabriele Tarollo and Filippo Botti and Tomaso Fontanini and Claudio Ferrari and Massimo Bertozzi and Andrea Prati},
-      year={2025},
-      eprint={2503.08307},
-      archivePrefix={arXiv},
-      primaryClass={cs.CV},
-      url={https://arxiv.org/abs/2503.08307}, 
+@ARTICLE{11626032,
+  author={Ergasti, Alex and Tarollo, Giuseppe and Botti, Filippo and Fontanini, Tomaso and Ferrari, Claudio and Bertozzi, Massimo and Prati, Andrea},
+  journal={IEEE Transactions on Multimedia}, 
+  title={TECMO: Efficient Temporal Cross-Interaction Module for Long Synchronized Audio-Video Generation}, 
+  year={2026},
+  volume={},
+  number={},
+  pages={1-12},
+  keywords={Modeling;Videos;Conferences;Windows;Sequential analysis;Diffusion models;Measurement;Audio-visual systems;Sequences;Computers},
+  doi={10.1109/TMM.2026.3717470}}
 }
 ```
 
